@@ -1,0 +1,27 @@
+Esse sistema consegue manter um banco de dados de clientes e serviços.
+
+Serviços são salvos e apresentados no seguinte formato:
+(Código, Nome, Quantidade de Prestações, Preço por Hora)
+
+Clientes são salvos e apresentados no seguinte formato:
+(Código, Nome, Cidade, Idade, Gênero)
+
+Ao se abrir o sistema, é apresentado um menu principal com todas as funcionalidades disponíveis. Utilize o número corresponde a cada opção para acessar cada funcionalidade:
+
+1 - Adicionar Servico
+Utilize essa opção para registrar um novo serviço no banco de dados do sistema, em seguida serão requisitados todos os dados do novo serviço.
+
+2- Remover Servico
+O sistema apresentará todos os serviços registrados no banco de dados. Insira o código (primeiro campo) correspondente ao serviço a ser removido para completar a operação.
+
+3 - Alterar Servico
+O sistema apresentará todos os serviços registrados no banco de dados. Insira o código (primeiro campo) correspondente ao serviço a ser alterado, logo em seguida serão requisitados os dados do serviço alterado.
+
+4 - Adicionar Cliente
+Utilize essa opção para registrar um novo cliente no banco de dados do sistema, em seguida serão requisitados todos os dados do novo cliente.
+
+5 - Remover Cliente
+O sistema apresentará todos os clientes registrados no banco de dados. Insira o código (primeiro campo) correspondente ao cliente a ser removido para completar a operação.
+
+6 - Alterar Cliente
+O sistema apresentará todos os cliente registrados no banco de dados. Insira o código (primeiro campo) correspondente ao cliente a ser alterado, logo em seguida serão requisitados os dados do cliente alterado.
