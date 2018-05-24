@@ -16,6 +16,7 @@ servicoGetPrest (_,_,i,_) = i
 servicoGetPreco :: Servico -> Float
 servicoGetPreco (_,_,_,i) = i
 
+--recebe dados de um novo servico
 newServico :: IO()
 newServico = do
     print ("[NOVO SERVICO]")
@@ -32,12 +33,14 @@ newServico = do
     let preco = (read precoString :: Float)
     saveServico(codigo, nome, quantidade, preco)
 
+--adiciona um novo servico no banco de dados
 saveServico :: Servico -> IO()
 saveServico s = do
     out <- openFile "servico.db" AppendMode
     hPutStrLn out (show s)
     hClose out
 
+--recebe do usuario a escolha de qual servico remover, recria o arquivo usando deleteServicoFromID e deleta o antigo
 deleteServico :: IO()
 deleteServico = do
     inp <- openFile "servico.db" ReadMode
@@ -48,13 +51,14 @@ deleteServico = do
     hClose inp
     renameFile "servico.db" "oldservico.db"
     inp <- openFile "oldservico.db" ReadMode
-    -- renameFile "servico.db" "oldservico.db"
     out <- openFile "servico.db" AppendMode
     deleteServicoFromID deleteid out inp
     hClose inp
     hClose out
     removeFile "oldservico.db"
 
+
+--recria o arquivo de servicos sem o ID escolhido
 deleteServicoFromID :: Int -> Handle -> Handle -> IO()
 deleteServicoFromID id out inp =
     do endoffile <- hIsEOF inp
@@ -64,10 +68,11 @@ deleteServicoFromID id out inp =
                 inpString <- hGetLine inp
                 let select = (read inpString :: Servico)
                 if (servicoGetCod select)==id
-                    then print("achou")
+                    then print("feito")
                     else hPutStrLn out (show select)
                 deleteServicoFromID id out inp
 
+--printa uma lista de todos os servicos salvos
 openServico :: Handle -> IO()
 openServico inp = 
     do inpeof <- hIsEOF inp
@@ -78,6 +83,7 @@ openServico inp =
                 print (inpString)
                 openServico inp
 
+--inicia o processo de alteracao de um servico
 changeServico :: IO()
 changeServico = do
     inp <- openFile "servico.db" ReadMode
@@ -88,8 +94,8 @@ changeServico = do
     hClose inp
     inp <- openFile "servico.db" ReadMode
     selectServicoFromID changeid inp
-    hClose inp
 
+--apartir de um id, encontra o servico para alteracao
 selectServicoFromID :: Int -> Handle -> IO()
 selectServicoFromID id inp =
     do endoffile <- hIsEOF inp
@@ -102,32 +108,39 @@ selectServicoFromID id inp =
                     then changeSelectedServico select inp
                     else selectServicoFromID id inp
 
+--obtem os novos dados com o usuario e atualiza o banco de dados
 changeSelectedServico :: Servico -> Handle -> IO()
-changeSelectedServico s h = do
-    print(s)
-    let id = servicoGetCod s
-    let desc = servicoGetDesc s
-    let prest = servicoGetPrest s
-    let preco = servicoGetPreco s
-    print("Escolha o campo para alterar:")
-    print("1 - ID")
-    print("2 - Descricao")
-    print("3 - Quantidade de Prestacoes")
-    print("4 - Preco por Hora")
-    changefieldstr <- getLine
-    let changefield = (read changefieldstr :: Int)
-    print("Novo valor do campo:")
-    if (changefield==1)
-        then do changevaluestr <- getLine
-        let changevalue = (read changevaluestr :: Int)
-        print(changevalue)
-        else print("lol")
+changeSelectedServico serv h = do
+    print ("[SERVICO SELECIONADO:]")
+    print(serv)
+    print ("Novo Codigo:")
+    codigoString <- getLine
+    let codigo = (read codigoString :: Int)
+    print ("Novo Nome:")
+    nome <- getLine
+    print ("Nova Quantidade de Prestacoes:")
+    quantidadeString <- getLine
+    let quantidade = (read quantidadeString :: Int)
+    print ("Novo Preco por Hora:")
+    precoString <- getLine
+    let preco = (read precoString :: Float)
+    hClose h
+    let deleteid = (servicoGetCod serv)
+    renameFile "servico.db" "oldservico.db"
+    inp <- openFile "oldservico.db" ReadMode
+    out <- openFile "servico.db" AppendMode
+    deleteServicoFromID deleteid out inp
+    hClose inp
+    hClose out
+    removeFile "oldservico.db"
+    saveServico(codigo, nome, quantidade, preco)
 
 type Cliente = (Int, String, String, Int, String)
 
 clienteGetCod :: Cliente -> Int
 clienteGetCod (i,_,_,_,_) = i
 
+--recebe do usuario os dados de um novo cliente
 newCliente :: IO()
 newCliente = do
     print ("[NOVO CLIENTE]")
@@ -145,12 +158,14 @@ newCliente = do
     genero <- getLine
     saveCliente(codigo, nome, cidade, idade, genero)
 
+--salva um novo cliente no banco de dados
 saveCliente :: Cliente -> IO()
 saveCliente c = do
     out <- openFile "cliente.db" AppendMode
     hPutStrLn out (show c)
     hClose out
 
+--recebe do usuario a escolha de qual cliente remover, recria o arquivo usando deleteClienteFromID e deleta o antigo
 deleteCliente :: IO()
 deleteCliente = do
     inp <- openFile "cliente.db" ReadMode
@@ -167,6 +182,7 @@ deleteCliente = do
     hClose out
     removeFile "oldcliente.db"
 
+--recria o arquivo de clientes sem o ID escolhido
 deleteClienteFromID :: Int -> Handle -> Handle -> IO()
 deleteClienteFromID id inp out =
     do inpeof <- hIsEOF inp
@@ -176,10 +192,11 @@ deleteClienteFromID id inp out =
                 inpString <- hGetLine inp
                 let select = (read inpString :: Cliente)
                 if (clienteGetCod select)==id
-                    then print("ta-dah")
+                    then print("feito")
                     else hPutStrLn out inpString
                 deleteClienteFromID id inp out
 
+--printa uma lista de todos os clientes salvos
 openCliente :: Handle -> IO()
 openCliente h = 
     do heof <- hIsEOF h
@@ -190,6 +207,59 @@ openCliente h =
                 print(inpString)
                 openCliente h
 
+--inica o processo de alteracao de um cliente
+changeCliente :: IO()
+changeCliente = do
+    inp <- openFile "cliente.db" ReadMode
+    openCliente inp
+    print("ID do cliente a ser alterado:")
+    changeidstr <- getLine
+    let changeid = (read changeidstr :: Int)
+    hClose inp
+    inp <- openFile "cliente.db" ReadMode
+    selectClienteFromID changeid inp
+
+--apartir de um ID, encontra o cliente para alteracao
+selectClienteFromID :: Int -> Handle -> IO()
+selectClienteFromID id inp = 
+    do endoffile <- hIsEOF inp
+       if endoffile
+            then return ()
+            else do
+                inpString <- hGetLine inp
+                let select = (read inpString :: Cliente)
+                if (clienteGetCod select)==id
+                    then changeSelectedCliente select inp
+                    else selectClienteFromID id inp
+
+--obtem os novos dados com o usuario e atualiza o banco de dados
+changeSelectedCliente :: Cliente -> Handle -> IO()
+changeSelectedCliente cli h = do
+    print("[CLINTE SELECIONADO:]")
+    print(cli)
+    print("Novo Codigo:")
+    codigoString <- getLine
+    let codigo = (read codigoString :: Int)
+    print("Novo Nome:")
+    nome <- getLine
+    print("Nova Cidade:")
+    cidade <- getLine
+    print("Nova Idade:")
+    idadeString <- getLine
+    let idade = (read idadeString :: Int)
+    print("Genero (M/F):")
+    genero <- getLine
+    let deleteid = (clienteGetCod cli)
+    renameFile "cliente.db" "oldcliente.db"
+    inp <- openFile "oldcliente.db" ReadMode
+    out <- openFile "cliente.db" AppendMode
+    deleteClienteFromID deleteid inp out
+    hClose inp
+    hClose out
+    removeFile "oldcliente.db"
+    saveCliente(codigo, nome, cidade, idade, genero)
+
+--apresenta um menu principal
 main :: IO ()
 main = do
     print ("Escolha uma opcao:")
@@ -210,5 +280,7 @@ main = do
                 else if (inp==4)
                     then newCliente
                     else if (inp==5)
-                        then deleteCliente 
-                        else do print("nao foi")
+                        then deleteCliente
+                        else if (inp==6)
+                        then changeCliente
+                        else do print("comando invalido")
